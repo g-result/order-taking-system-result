@@ -1,0 +1,57 @@
+{
+  "cli": {
+    "version": ">= 7.6.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENV": "development",
+        "EXPO_PUBLIC_ORIGIN": "http://localhost:3000",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://erjmcgetrfbugwjyjrkz.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyam1jZ2V0cmZidWd3anlqcmt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTMyNjU3MDUsImV4cCI6MjAyODg0MTcwNX0.qTJePi-XEjZUKGX21o5rbQCDVyaXafxKs4oO-4idcRk"
+      }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "channel": "development-simulator",
+      "env": {
+        "EXPO_PUBLIC_ENV": "development",
+        "EXPO_PUBLIC_ORIGIN": "http://localhost:3000",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://erjmcgetrfbugwjyjrkz.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyam1jZ2V0cmZidWd3anlqcmt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTMyNjU3MDUsImV4cCI6MjAyODg0MTcwNX0.qTJePi-XEjZUKGX21o5rbQCDVyaXafxKs4oO-4idcRk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_ENV": "preview",
+        "EXPO_PUBLIC_ORIGIN": "https://stg-order-taking-system.vercel.app",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://erjmcgetrfbugwjyjrkz.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyam1jZ2V0cmZidWd3anlqcmt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTMyNjU3MDUsImV4cCI6MjAyODg0MTcwNX0.qTJePi-XEjZUKGX21o5rbQCDVyaXafxKs4oO-4idcRk"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_ENV": "production",
+        "EXPO_PUBLIC_ORIGIN": "https://www.yamaichi-j-app.com",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://uxmylsxhcgzcgbezcgsn.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4bXlsc3hoY2d6Y2diZXpjZ3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTQ1Nzc3NzAsImV4cCI6MjAzMDE1Mzc3MH0.SqNFja7PfYV-Gtq-1F4TT6ewrMdKxvr1nLLMFWks1tI"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

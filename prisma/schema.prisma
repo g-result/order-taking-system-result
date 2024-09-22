@@ -1,0 +1,275 @@
+// docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+
+  // provider = "sqlite"
+  // url      = env("SQLITE_URL")
+}
+
+// 【ユーザー関連】
+// User: ユーザー情報を管理するモデル
+model User {
+  id                     String   @id // Supabase AuthのユーザーID (主キー)
+  shopName               String   // お店の名前
+  businessType           String?  // 該当の業態 (オプション)
+  email                  String   @unique // メールアドレス (ユニーク制約)
+  name                   String   // 名前
+  nameKana               String   // 名前(カナ)
+  companyName            String?  // 会社名 (オプション)
+  phoneNumber            String   // 電話番号
+  transferName           String   // 振り込み者名
+  transferNameKana       String   // 振り込み者名(カナ)
+  postalCode             String?  // 郵便番号 (オプション)
+  prefecture             String?  // 都道府県 (オプション)
+  city                   String?  // 市区町村 (オプション)
+  addressLine            String?  // その先の住所 (オプション)
+  roleType               RoleType // ユーザーの役割 (USER or ADMIN)
+  approvalStatus         ApprovalStatus @default(APPLYING) // 承認ステータス
+  pushNotificationEnabled Boolean @default(true) // Push通知のオンオフ
+  devicePushToken            String?  // プッシュ通知用のトークン (オプション)
+  createdAt              DateTime @default(now()) // 作成日時
+  updatedAt              DateTime @updatedAt // 更新日時
+  lastLogin              DateTime? // 最終ログイン日時 (オプション)
+  cart                   Cart?    // カート情報 (1対1)
+  orders                 Order[]  // 注文情報 (1対多)
+  passwordResetToken     String? @unique // パスワードリセットトークン (オプション)
+}
+
+// ApprovalStatus：承認ステータスを表す列挙型
+enum ApprovalStatus {
+  APPLYING // 承認待ち
+  APPROVED // 使用中
+  REJECTED // アカウント停止
+}
+
+// RoleType: ユーザーの役割を表す列挙型
+enum RoleType {
+  USER  // 一般ユーザー
+  ADMIN // 管理者
+}
+
+// 【商品関連】
+// Product: 商品情報を管理するモデル
+model Product {
+  id            Int                  @id @default(autoincrement()) // 商品ID (主キー)
+  name          String               // 商品名
+  description   String?              // 商品説明 (オプション)
+  origin        String               // 産地
+  unit          String               // 商品単位
+  isPublished   Boolean              @default(false) // 公開するか否か
+  rank          RankEnum             // ランク (1から5)
+  isRecommended Boolean              @default(false) // おすすめ商品かどうか
+  pricingType   String               // '魚'または'その他'
+  separateBackBelly Boolean          @default(false)
+  createdAt     DateTime             @default(now()) // 作成日時
+  updatedAt     DateTime             @updatedAt // 更新日時
+  publishedAt   DateTime?            // 公開日時 (オプション)
+  publishedEndAt DateTime?           // 公開停止日時 (オプション)
+  deletedAt     DateTime?            // 論理削除のタイムスタンプ (オプション)
+  categories    ProductCategory[]    // カテゴリー (多対多)
+  tags          ProductTag[]         // タグ (多対多)
+  recommendTags ProductRecommendTag[] // おすすめ関連タグ (多対多)
+  images        ProductImage[]       // 商品画像 (1対多)
+  variants      ProductVariant[]     // 商品バリエーション (1対多)
+  totalStock    Int?                 // 在庫数
+}
+
+// RankEnum: 商品のランクを表す列挙型
+enum RankEnum {
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
+}
+
+// Category: 商品のカテゴリー情報を管理するモデル
+model Category {
+  id        Int               @id @default(autoincrement()) // カテゴリーID (主キー)
+  name      String            @unique // カテゴリー名 (ユニーク制約)
+  iconUrl   String?           // アイコンのURL
+  color     String?           // カテゴリーの色
+  createdAt DateTime          @default(now()) // 作成日時
+  updatedAt DateTime          @updatedAt // 更新日時
+  products  ProductCategory[] // 商品 (多対多)
+}
+
+// Tag: 商品のタグ情報を管理するモデル
+model Tag {
+  id        Int          @id @default(autoincrement()) // タグID (主キー)
+  name      String       @unique // タグ名 (ユニーク制約)
+  createdAt DateTime     @default(now()) // 作成日時
+  updatedAt DateTime     @updatedAt // 更新日時
+  products  ProductTag[] // 商品 (多対多)
+}
+
+// RecommendTag: おすすめ関連タグ情報を管理するモデル
+model RecommendTag {
+  id        Int                   @id @default(autoincrement()) // おすすめ関連タグID (主キー)
+  name      String                @unique // おすすめ関連タグ名 (ユニーク制約)
+  createdAt DateTime              @default(now()) // 作成日時
+  updatedAt DateTime              @updatedAt // 更新日時
+  products  ProductRecommendTag[] // 商品 (多対多)
+}
+
+// ProductCategory: 商品とカテゴリーの中間テーブル
+model ProductCategory {
+  id         Int      @id @default(autoincrement()) // 商品カテゴリーID (主キー)
+  productId  Int      // 商品ID (外部キー)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // 商品 (多対1)
+  categoryId Int      // カテゴリーID (外部キー)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade) // カテゴリー (多対1)
+  createdAt  DateTime @default(now()) // 作成日時
+  updatedAt  DateTime @updatedAt // 更新日時
+}
+
+// ProductTag: 商品とタグの中間テーブル
+model ProductTag {
+  id        Int      @id @default(autoincrement()) // 商品タグID (主キー)
+  productId Int      // 商品ID (外部キー)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // 商品 (多対1)
+  tagId     Int      // タグID (外部キー)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade) // タグ (多対1)
+  createdAt DateTime @default(now()) // 作成日時
+  updatedAt DateTime @updatedAt // 更新日時
+}
+
+// ProductRecommendTag: 商品とおすすめ関連タグの中間テーブル
+model ProductRecommendTag {
+  id             Int          @id @default(autoincrement()) // 商品おすすめ関連タグID (主キー)
+  productId      Int          // 商品ID (外部キー)
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade) // 商品 (多対1)
+  recommendTagId Int          // おすすめ関連タグID (外部キー)
+  recommendTag   RecommendTag @relation(fields: [recommendTagId], references: [id], onDelete: Cascade) // おすすめ関連タグ (多対1)
+  createdAt      DateTime     @default(now()) // 作成日時
+  updatedAt      DateTime     @updatedAt // 更新日時
+}
+
+// ProductImage: 商品の画像情報を管理するモデル
+model ProductImage {
+  id          Int      @id @default(autoincrement()) // 商品画像ID (主キー)
+  productId   Int      // 商品ID (外部キー)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // 商品 (多対1)
+  url         String   // 画像URL
+  createdAt   DateTime @default(now()) // 作成日時
+  updatedAt   DateTime @updatedAt // 更新日時
+}
+
+// ProductVariant: 商品のバリエーション情報を管理するモデル
+model ProductVariant {
+  id               Int            @id @default(autoincrement()) // 商品バリエーションID (主キー)
+  productId        Int            // 商品ID (外部キー)
+  product          Product        @relation(fields: [productId], references: [id], onDelete: Cascade) // 商品 (多対1)
+  salesFormat      String         // 販売形態
+  unitType         ProductUnitType // 商品の単位 (WHOLE, HALF_BODY, QUATER_BACK, QUATER_BELLY)
+  price            Int            // 価格（税抜）
+  tax              Int?            // 税率（パーセント）
+  discountedPrice  Int?           // 割引後の価格 (オプション)
+  quantity         Int            // 在庫数
+  cartItems        CartItem[]     // カート内商品 (1対多)
+  createdAt        DateTime       @default(now()) // 作成日時
+  updatedAt        DateTime       @updatedAt // 更新日時
+  displayOrder     Int?            // 表示順序
+}
+
+// ProductUnitType: 商品の単位を表す列挙型
+enum ProductUnitType {
+  WHOLE        // 1本
+  HALF_BODY    // 半身
+  QUATER_BACK  // 1/4背
+  QUATER_BELLY // 1/4腹
+}
+
+// 【カート関連】
+// Cart: ユーザーのカート情報を管理するモデル
+model Cart {
+  id        Int        @id @default(autoincrement()) // カートID (主キー)
+  userId    String        @unique // ユーザーID (外部キー、ユニーク制約)
+  user      User       @relation(fields: [userId], references: [id]) // ユーザー (1対1)
+  items     CartItem[] // カート内商品 (1対多)
+  createdAt DateTime   @default(now()) // 作成日時
+  updatedAt DateTime   @updatedAt // 更新日時
+}
+
+// CartItem: カートに追加された商品情報を管理するモデル
+model CartItem {
+  id              Int            @id @default(autoincrement()) // カート内商品ID (主キー)
+  cartId          Int            // カートID (外部キー)
+  cart            Cart           @relation(fields: [cartId], references: [id],onDelete: Cascade) // カート (多対1)
+  productVariantId Int           // 商品バリエーションID (外部キー)
+  productVariant  ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade) // 商品バリエーション (多対1)
+  quantity        Int            // 数量
+  orderType        OrderType     @default(Order)   // 注文タイプ
+  createdAt       DateTime       @default(now()) // 作成日時
+  updatedAt       DateTime       @updatedAt // 更新日時
+}
+
+// 【注文関連】
+// Order: 注文情報を管理するモデル
+model Order {
+  id           Int         @id @default(autoincrement()) // 注文ID (主キー)
+  userId       String         // ユーザーID (外部キー)
+  user         User        @relation(fields: [userId], references: [id]) // ユーザー (多対1)
+  totalAmount  Int         // 合計金額
+  createdAt    DateTime    @default(now()) // 作成日時
+  updatedAt    DateTime    @updatedAt // 更新日時
+  items        OrderItem[] // 注文商品 (1対多)
+  memo         String?     // 注文メモ (オプション)
+  orderNumber  String      // 注文番号 ここから追加
+  orderDate    DateTime    // 注文日時
+  orderQuantity Int        // 注文商品数
+  isCancelled  Boolean     // キャンセルの有無
+  cancelReason  String?    //キャンセル理由
+}
+
+// OrderItem: 注文された商品情報を管理するモデル
+model OrderItem {
+  id               Int             @id @default(autoincrement()) // 注文商品ID (主キー)
+  orderId          Int             // 注文ID (外部キー)
+  order            Order           @relation(fields: [orderId], references: [id]) // 注文 (多対1)
+  productName      String          // 商品名
+  salesFormat      String          // 販売形態
+  unitType         ProductUnitType // 商品の単位
+  price            Int             // 価格
+  quantity         Int             // 発注数
+  orderType        OrderType        @default(Order) // 注文タイプ
+  separateBackBelly Boolean?       // 背と腹に分かれているかどうか
+  productUnit      String?         // 商品単位
+  pricingType      String         // '魚'または'その他'
+  createdAt        DateTime        @default(now()) // 作成日時
+  updatedAt        DateTime        @updatedAt // 更新日時
+}
+
+enum OrderType {
+  Order
+  Request
+}
+
+// 【その他】
+// News: お知らせ情報を管理するモデル
+model News {
+  id             Int      @id @default(autoincrement()) // お知らせID (主キー)
+  title          String   // タイトル
+  content        String   // 内容
+  publishedAt    DateTime // 公開日時
+  publishedEndAt DateTime // 公開終了日時
+  createdAt      DateTime @default(now()) // 作成日時
+  updatedAt      DateTime @updatedAt // 更新日時
+  notified       Boolean  @default(false) // 通知済みフラグ
+}
+
+// 【グローバル設定】
+// GlobalSettings: グローバル設定を管理するモデル
+model GlobalSettings {
+  id                          String   @id @default(uuid()) // グローバル設定ID (主キー)
+  overrideUsageRestriction    Boolean  @default(false) // 利用制限を無視するかどうか
+  createdAt                   DateTime @default(now()) // 作成日時
+  updatedAt                   DateTime @updatedAt // 更新日時
+  text                        String?  // テキスト
+}
